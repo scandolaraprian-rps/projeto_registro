@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 1. Primitive Helpers
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isOwner(orgId) { return isSignedIn() && get(/databases/$(database)/documents/organizations/$(orgId)).data.ownerId == request.auth.uid; }
+    function isVerified() { return request.auth.token.email_verified == true; }
+
+    // 2. Validation Blueprints
+    function isValidOrganization(data) {
+      return data.id is string && data.id.size() == 36 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.apiKey is string && data.apiKey.size() == 64 &&
+             data.ownerId == request.auth.uid &&
+             data.createdAt == request.time;
+    }
+
+    function isValidSourceSystem(data) {
+      return data.id is string && data.id.size() == 36 &&
+             data.organizationId is string && data.organizationId.size() == 36 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.environment in ['PROD', 'STAG', 'DEV'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidEvent(data) {
+      return data.id is string && data.id.size() == 36 &&
+             data.sourceSystemId is string && data.sourceSystemId.size() == 36 &&
+             data.organizationId is string && data.organizationId.size() == 36 &&
+             data.eventType is string && data.eventType.size() > 0 &&
+             data.contentJson is map &&
+             data.hashCalculated is string && data.hashCalculated.size() == 64 &&
+             data.createdAt == request.time &&
+             data.statusAnchoring in ['PENDING', 'ANCHORED', 'FAILED'];
+    }
+
+    function isValidProof(data) {
+      return data.id is string && data.id.size() == 36 &&
+             data.eventId is string && data.eventId.size() == 36 &&
+             data.txHash is string && data.txHash.size() == 66 &&
+             data.blockNumber is int &&
+             data.contractAddress is string && data.contractAddress.size() == 42 &&
+             data.status in ['PENDING', 'MINED', 'FAILED'] &&
+             data.registeredAt == request.time &&
+             data.eventHash is string && data.eventHash.size() == 64;
+    }
+
+    function isValidAudit(data) {
+      return data.id is string && data.id.size() == 36 &&
+             data.eventId is string && data.eventId.size() == 36 &&
+             data.verifiedAt == request.time &&
+             data.integrityResult is bool &&
+             data.auditorUser == request.auth.token.email;
+    }
+
+    // 3. Collection Rules
+    match /organizations/{orgId} {
+      allow create: if isSignedIn() && isVerified() && isValidOrganization(incoming());
+      allow get: if isSignedIn() && (existing().ownerId == request.auth.uid);
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      
+      match /sourceSystems/{systemId} {
+        allow create: if isSignedIn() && isVerified() && isOwner(orgId) && isValidSourceSystem(incoming());
+        allow read: if isSignedIn() && isOwner(orgId);
+      }
+
+      match /events/{eventId} {
+        allow create: if isSignedIn() && isVerified() && isOwner(orgId) && isValidEvent(incoming());
+        allow read: if isSignedIn(); // Allow reading for audits by any signed in user (auditor)
+        
+        // Action: Update anchoring status (System normally, but here we allow owner for simulation)
+        allow update: if isSignedIn() && isOwner(orgId) && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['statusAnchoring']) &&
+                      incoming().statusAnchoring != existing().statusAnchoring;
+
+        match /proofs/{proofId} {
+          allow create: if isSignedIn() && isVerified() && isOwner(orgId) && isValidProof(incoming());
+          allow read: if isSignedIn();
+        }
+
+        match /audits/{auditId} {
+          allow create: if isSignedIn() && isVerified() && isValidAudit(incoming());
+          // List queries must be filtered by auditor or owner
+          allow list: if isSignedIn() && (resource.data.auditorUser == request.auth.token.email || isOwner(orgId));
+          allow get: if isSignedIn();
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --ink: #f8fafc;
+    --ink-muted: #94a3b8;
+    --brand: #38bdf8;
+    --line: #334155;
+    --success: #10b981;
+    --warning: #f59e0b;
+  }
+
+  body {
+    @apply bg-[var(--bg)] text-[var(--ink)] font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-sans font-semibold tracking-tight;
+  }
+}
+
+.card-panel {
+  @apply bg-[var(--surface)] border border-[var(--line)] rounded-lg shadow-sm;
+}
+
+.data-grid {
+  @apply border border-[var(--line)] rounded-lg overflow-hidden bg-[var(--surface)];
+}
+
+.data-row {
+  @apply grid border-b border-[var(--line)] last:border-0 hover:bg-white/5 transition-colors;
+}
+
+.status-badge {
+  @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border;
+}
+
+.status-pending { @apply bg-amber-500/10 text-[var(--warning)] border-amber-500/20; }
+.status-anchored { @apply bg-emerald-500/10 text-[var(--success)] border-emerald-500/20; }
+.status-failed { @apply bg-red-500/10 text-red-400 border-red-500/20; }
+
+.mono { @apply font-mono text-[11px] tracking-tight text-[var(--brand)]; }
+
