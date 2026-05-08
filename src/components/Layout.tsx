@@ -121,7 +121,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
 
         <div className="p-6 border-t border-[var(--line)] bg-[var(--surface)]/30">
           <div className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-[var(--line)] rounded-xl mb-6 overflow-hidden shadow-sm">
-            <img src={user.user_metadata?.avatar_url || ''} alt="" className="w-10 h-10 rounded-lg grayscale hover:grayscale-0 transition-all" />
+            <img src={user.user_metadata?.avatar_url || ''} alt="" className="w-10 h-10 rounded-lg transition-all" />
             <div className="min-w-0">
               <p className="text-xs font-bold truncate text-[var(--ink)]">{user.user_metadata?.full_name || user.email}</p>
               <p className="text-[9px] mono text-[var(--brand)] uppercase truncate opacity-80">Auditor Autorizado</p>
