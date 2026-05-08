@@ -27,7 +27,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
       email: 'auditor@authledger.io',
       user_metadata: {
         full_name: 'Lead Auditor Crypto',
-        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
+        avatar_url: 'https://i.pinimg.com/564x/24/6a/3c/246a3c0474041086407123869b914a17.jpg'
       }
     };
     localStorage.setItem('mock_user', JSON.stringify(mockUser));
