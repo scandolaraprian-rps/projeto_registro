@@ -26,8 +26,8 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
       id: 'mock-123',
       email: 'auditor@authledger.io',
       user_metadata: {
-        full_name: 'Lead Auditor Crypto',
-        avatar_url: 'https://i.pinimg.com/564x/24/6a/3c/246a3c0474041086407123869b914a17.jpg'
+        full_name: 'Salsicha Auditor (Lead)',
+        avatar_url: 'https://images.unsplash.com/photo-1612195583950-b8fd34c87093?q=80&w=200&auto=format&fit=crop'
       }
     };
     localStorage.setItem('mock_user', JSON.stringify(mockUser));
