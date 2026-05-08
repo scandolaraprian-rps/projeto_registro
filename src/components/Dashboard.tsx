@@ -20,7 +20,7 @@ import {
   TrendingUp,
   AlertCircle
 } from 'lucide-react';
-import { supabaseService } from '../services/supabaseService';
+import { mockDatabase } from '../services/mockService';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -41,7 +41,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchRecent = async () => {
       try {
-        const events = await supabaseService.list('events');
+        const events = mockDatabase.list();
         setRecentEvents(events.slice(0, 5));
       } catch (e) {
         console.error(e);

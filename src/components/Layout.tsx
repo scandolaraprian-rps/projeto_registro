@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { User } from '@supabase/supabase-js';
 import { LogOut, Shield, LayoutDashboard, Search, PlusCircle, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -11,36 +9,34 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, activeTab, onTabChange }: LayoutProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ id: string, email: string, user_metadata: any } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    // Check for mock session
+    const savedUser = localStorage.getItem('mock_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
   }, []);
 
   const login = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin
+    const mockUser = {
+      id: 'mock-123',
+      email: 'auditor@authledger.io',
+      user_metadata: {
+        full_name: 'Lead Auditor Crypto',
+        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix'
       }
-    });
+    };
+    localStorage.setItem('mock_user', JSON.stringify(mockUser));
+    setUser(mockUser);
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('mock_user');
+    setUser(null);
   };
 
   if (loading) {

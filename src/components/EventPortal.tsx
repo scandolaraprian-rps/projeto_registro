@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { calculateEventHash } from '../lib/crypto';
-import { supabaseService } from '../services/supabaseService';
+import { mockDatabase } from '../services/mockService';
 import { 
   FileJson, 
   Send, 
@@ -58,7 +58,7 @@ export default function EventPortal() {
       };
 
       try {
-        await supabaseService.insert('events', eventData);
+        mockDatabase.insert(eventData);
       } catch (dbErr) {
         console.warn('Persistence failed, continuing with demo mode:', dbErr);
       }

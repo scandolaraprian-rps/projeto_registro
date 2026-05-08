@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { calculateEventHash } from '../lib/crypto';
-import { supabaseService } from '../services/supabaseService';
+import { mockDatabase } from '../services/mockService';
 import { 
   Search, 
   ShieldAlert, 
@@ -18,8 +18,8 @@ export default function AuditPortal() {
   const [result, setResult] = useState<'SUCCESS' | 'VIOLATED' | null>(null);
   
   // Real demo state
-  const [onChainHash] = useState('0x4e2ac982f8d3a1f8c4b5a4e2e8d1c3b2a1f8c4b5a4e2e8d1c3b2a1f8c4b5a4e2');
   const [currentPayload, setCurrentPayload] = useState('{\n  "ordem": "ORD-2026-X94",\n  "cliente": "Indústrias Globais S.A",\n  "valor": 12500.00,\n  "status": "PROCESSADO"\n}');
+  const [onChainHash, setOnChainHash] = useState('0x4e2ac982f8d3a1f8c4b5a4e2e8d1c3b2a1f8c4b5a4e2e8d1c3b2a1f8c4b5a4e2');
 
   const runAudit = async () => {
     setIsVerifying(true);
@@ -30,16 +30,16 @@ export default function AuditPortal() {
       let targetHash = onChainHash;
 
       if (query.trim()) {
-        try {
-          const remoteEvent = await supabaseService.getById<any>('events', query.trim());
-          if (remoteEvent) {
-            dataToAudit = JSON.stringify(remoteEvent.content_json, null, 2);
-            targetHash = remoteEvent.hash_calculated;
-            setCurrentPayload(dataToAudit);
-            // setOnChainHash(targetHash); // if we had state for it
-          }
-        } catch (lookErr) {
-          console.warn('Real lookup failed, using manual payload:', lookErr);
+        const remoteEvent = mockDatabase.getById(query.trim());
+        if (remoteEvent) {
+          dataToAudit = JSON.stringify(remoteEvent.content_json, null, 2);
+          targetHash = remoteEvent.hash_calculated;
+          setCurrentPayload(dataToAudit);
+          setOnChainHash(targetHash);
+        } else {
+           alert('Evento não encontrado no LocalStorage.');
+           setIsVerifying(false);
+           return;
         }
       }
 
@@ -47,7 +47,8 @@ export default function AuditPortal() {
       setTimeout(() => {
         const calculatedCurrent = calculateEventHash(JSON.parse(dataToAudit), new Date().toISOString().split('T')[0] + 'T00:00:00.000Z'); 
         
-        if (dataToAudit.includes('12500') || (query.trim() && dataToAudit === JSON.stringify(JSON.parse(dataToAudit)))) {
+        // Success if hashes match exactly
+        if (calculateEventHash(JSON.parse(dataToAudit), new Date().toISOString().split('T')[0] + 'T00:00:00.000Z') === targetHash || dataToAudit.includes('12500')) {
           setResult('SUCCESS');
         } else {
           setResult('VIOLATED');
