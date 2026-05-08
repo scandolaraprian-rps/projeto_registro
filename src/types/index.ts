@@ -4,7 +4,7 @@ export const EventSchema = z.object({
   organizationId: z.string().uuid(),
   systemId: z.string().uuid(),
   eventType: z.string().min(1),
-  contentJson: z.record(z.any()),
+  contentJson: z.record(z.string(), z.any()),
 });
 
 export type EventInput = z.infer<typeof EventSchema>;

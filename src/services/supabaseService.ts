@@ -24,7 +24,7 @@ export const supabaseService = {
   async insert<T>(table: string, item: T) {
     const { data, error } = await supabase
       .from(table)
-      .insert([item])
+      .insert([item as any])
       .select()
       .single();
     if (error) throw error;
@@ -34,7 +34,7 @@ export const supabaseService = {
   async update<T>(table: string, id: string, changes: Partial<T>) {
     const { data, error } = await supabase
       .from(table)
-      .update(changes)
+      .update(changes as any)
       .eq('id', id)
       .select()
       .single();

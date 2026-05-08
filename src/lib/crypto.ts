@@ -1,4 +1,4 @@
-import { sha256 } from 'crypto-js';
+import CryptoJS from 'crypto-js';
 
 export const SYSTEM_SALT = 'AUTHLEDGER_SECURE_SALT_v1';
 
@@ -9,5 +9,5 @@ export const SYSTEM_SALT = 'AUTHLEDGER_SECURE_SALT_v1';
 export function calculateEventHash(payload: any, timestamp: string): string {
   const payloadString = JSON.stringify(payload);
   const dataToHash = payloadString + timestamp + SYSTEM_SALT;
-  return sha256(dataToHash).toString();
+  return CryptoJS.SHA256(dataToHash).toString();
 }
