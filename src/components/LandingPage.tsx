@@ -56,7 +56,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
               Iniciar Verificação <ArrowRight className="w-4 h-4" />
             </button>
             <a 
-              href="https://github.com" 
+              href="https://github.com/scandolaraprian-rps/projeto_registro" 
               target="_blank"
               rel="noreferrer"
               className="w-full sm:w-auto px-8 py-4 bg-white/5 border border-[#334155] text-[#f8fafc] rounded-xl font-bold text-sm uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
